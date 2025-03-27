@@ -5,13 +5,15 @@ from pydantic import BaseModel
 import os
 import re
 
-
-# Configure Google Gemini API
-genai.configure(api_key=os.getenv("AIzaSyAJqpA7IJWpUTJnIngtpewXea_A2RGJ1I0"), transport="rest")
-  # Set API key in environment variables
  
 # Initialize FastAPI app
 app = FastAPI()
+
+# Initialize gemini LLM
+
+genai.configure(api_key= "AIzaSyAJqpA7IJWpUTJnIngtpewXea_A2RGJ1I0", transport="rest")
+model = genai.GenerativeModel("gemini-1.5-pro")
+    
 
 # Oracle DB Connection Details
 DB_USER = "PCLP25FEB25"
@@ -25,9 +27,7 @@ class QueryRequest(BaseModel):
 # Define a function to generate SQL using LLM
 def generate_sql(user_query):
     """Use Gemini LLM to generate SQL query."""
-    genai.configure(api_key= "AIzaSyAJqpA7IJWpUTJnIngtpewXea_A2RGJ1I0", transport="rest")
-    model = genai.GenerativeModel("gemini-1.5-pro")
-    
+        
     prompt = f"""
     Convert the following user request into an SQL query:
 
@@ -87,9 +87,17 @@ def query_expense(request: QueryRequest):
 
     # Execute the SQL query
     result = execute_sql(sql_query)
+    formatted_response = generate_response(user_query, result)
 
-    return {"query": sql_query, "response": result}
+    return {"query": sql_query, "response": formatted_response}
 
+def generate_response(user_query, result):
+    prompt = f"Convert the following database result into a natural language response: \n\nUser Query: {user_query}\nDatabase Result: {result}\n\nGenerate a response in a human-friendly format."
+    
+    response = model.generate_content(prompt)
+    
+    return response.text
+    
 # Run the API server
 if __name__ == "__main__":
     import uvicorn
