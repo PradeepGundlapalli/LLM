@@ -11,7 +11,7 @@ app = FastAPI()
 
 # Initialize gemini LLM
 
-genai.configure(api_key= "AIzaSyAJqpA7IJWpUTJnIngtpewXea_A2RGJ1I0", transport="rest")
+genai.configure(api_key= "xxxxx", transport="rest")
 model = genai.GenerativeModel("gemini-1.5-pro")
     
 
